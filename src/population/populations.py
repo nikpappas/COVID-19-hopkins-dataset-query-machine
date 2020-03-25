@@ -1,8 +1,11 @@
-import country.countries as c
+import csv
+from core.utils import parseInt
 
-populations = {
-    c.greece: 10748317,
-    c.spain: 45692879,
-    c.uk: 66671236,
-    c.italy: 60015526,
-}
+
+def readCsv():
+    with open('../API_SP.POP.TOTL_DS2_en_csv_v2_887275.csv') as csvfile:
+        rows = csv.DictReader(csvfile)
+        return {row['\ufeff"Country Name"']: parseInt(row['2018']) for row in rows}
+
+
+populations = readCsv()
