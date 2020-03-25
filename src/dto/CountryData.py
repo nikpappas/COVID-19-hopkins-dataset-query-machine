@@ -1,41 +1,25 @@
 from collections import OrderedDict
 from datetime import timedelta, datetime
+from core.mathUtils import differentiate_distinct
 
 class CountryData(object):
-    def __init__(self, country, population, deathsAccPerDay):
+    def __init__(self, country, population, deathsAccPerDate, confirmedAccPerDate, recoveredAccPerDate):
         self.country = country
         self.population = population
-        self.deathsAccPerDate = deathsAccPerDay
+        self.deathsAccPerDate = deathsAccPerDate
+        self.confirmedAccPerDate = confirmedAccPerDate
+        self.recoveredAccPerDate = recoveredAccPerDate
 
     def getDeathsPerDate(self):
-        res = {}
-        for day in self.deathsAccPerDate:
-            prevDay = day - timedelta(days=1)
-            if prevDay not in self.deathsAccPerDate:
-               res[day] = self.deathsAccPerDate[day]
-            else:
-                res[day] = self.deathsAccPerDate[day] - self.deathsAccPerDate[prevDay]
-        return res
+        return differentiate_distinct(self.deathsAccPerDate, lambda day: day - timedelta(days=1))
 
     def getTotalDeaths(self):
         return max(self.deathsAccPerDate.values())
 
-    def deathsAccPerdayRatio(self):
+    def deathsAccPerDateRatio(self):
         if self.population:
             return OrderedDict([(k, self.deathsAccPerDate[k] / self.population) for k in self.deathsAccPerDate])
 
-    def appendDeaths(self, deaths):
-        for k in deaths:
-            self.deathsAccPerDate[k] = self.deathsAccPerDate[k] + deaths[k]
-
-
-
-
-def getPrevDayKey(k):
-    day = parseDateKey(k)
-
-
-def parseDateKey(k):
-    tokens = k.split("/");
-    return datetime.date(tokens[0],tokens[1],tokens[2])
-
+    def deathsPerDateRatio(self):
+        if self.population:
+            return OrderedDict([(k, self.getDeathsPerDate()[k] / self.population) for k in self.getDeathsPerDate()])
