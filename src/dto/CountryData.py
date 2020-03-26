@@ -1,6 +1,8 @@
 from collections import OrderedDict
 from datetime import timedelta, datetime
 from core.mathUtils import differentiate_distinct
+import core.Aggregations as agg
+
 
 class CountryData(object):
     def __init__(self, country, population, deathsAccPerDate, confirmedAccPerDate, recoveredAccPerDate):
@@ -10,16 +12,52 @@ class CountryData(object):
         self.confirmedAccPerDate = confirmedAccPerDate
         self.recoveredAccPerDate = recoveredAccPerDate
 
-    def getDeathsPerDate(self):
-        return differentiate_distinct(self.deathsAccPerDate, lambda day: day - timedelta(days=1))
+    def deathsPerDate(self):
+        return perDate(self.deathsAccPerDate)
 
-    def getTotalDeaths(self):
-        return max(self.deathsAccPerDate.values())
+    def recoveredPerDate(self):
+        return perDate(self.recoveredAccPerDate)
+
+    def confirmedPerDate(self):
+        return perDate(self.confirmedAccPerDate)
+
+    def totalDeaths(self):
+        return total(self.deathsAccPerDate)
+
+    def totalRecovered(self):
+        return total(self.recoveredAccPerDate)
+
+    def totalConfirmed(self):
+        return total(self.confirmedAccPerDate)
 
     def deathsAccPerDateRatio(self):
-        if self.population:
-            return OrderedDict([(k, self.deathsAccPerDate[k] / self.population) for k in self.deathsAccPerDate])
+        return seriesPerRatio(self.deathsAccPerDate, self.population)
 
     def deathsPerDateRatio(self):
-        if self.population:
-            return OrderedDict([(k, self.getDeathsPerDate()[k] / self.population) for k in self.getDeathsPerDate()])
+        return seriesPerRatio(self.deathsPerDate(), self.population)
+
+    def confirmedAccPerDateRatio(self):
+        return seriesPerRatio(self.confirmedAccPerDate, self.population)
+
+    def confirmedPerDateRatio(self):
+        return seriesPerRatio(self.confirmedPerDate(), self.population)
+
+    def recoveredAccPerDateRatio(self):
+        return seriesPerRatio(self.recoveredAccPerDate, self.population)
+
+    def recoveredPerDateRatio(self):
+        return seriesPerRatio(self.recoveredPerDate(), self.population)
+
+
+def perDate(accStat):
+    return differentiate_distinct(accStat, lambda day: day - timedelta(days=1))
+
+
+def total(accStat):
+    return max(accStat.values())
+
+def seriesPerRatio(accStat, population):
+    if population:
+        return OrderedDict([(k, accStat[k] / population) for k in accStat])
+
+

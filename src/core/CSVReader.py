@@ -35,29 +35,32 @@ def main():
     countryData = [countries[x] for x in COI]
     plt.subplot(2, 1, 1)
     for country in countryData:
-        deathsPerDateAcc = country.deathsAccPerDate
+        deathsPerDateAcc = country.recoveredAccPerDate
         print("Total deaths: " + country.country + " | " + str(max(deathsPerDateAcc.values())))
         plt.plot(
-            list(deathsPerDateAcc.keys())[30:-1],
-            list(deathsPerDateAcc.values())[30:-1],
+            list(deathsPerDateAcc.keys()),
+            list(deathsPerDateAcc.values()),
             label=country.country + " deaths Acc"
         )
     plt.legend()
     plt.title('Deaths accumulative', fontsize=16)
     plt.subplot(2, 1, 2)
+
+    countryData = [series[x] for x in COI]
     for country in countryData:
-        deathsPerDate = country.getDeathsPerDate()
+        deathsPerDate = country.recoveredAccPerDate
         print("Max  deathsperDate: " + country.country + " | " + str(max(deathsPerDate.values())))
         print("Last deathsperDate: " + country.country + " | " + str(list(deathsPerDate.values())[-1]))
         plt.plot(
-            list(deathsPerDate.keys())[30:-1],
-            list(deathsPerDate.values())[30:-1],
+            list(deathsPerDate.keys()),
+            list(deathsPerDate.values()),
             label=country.country + " deaths"
         )
     plt.legend()
     plt.title('Deaths per day', fontsize=16)
     plt.show()
     print(agg.totalDeaths(countries))
+    print(agg.totalDeaths(series))
 
 
 class DbEntry:
@@ -77,7 +80,7 @@ def parseDate(string):
 
 def readStats(file):
     with open(file) as csvfile:
-        return [DbEntry(x) for x in csv.DictReader(csvfile)]
+        return [DbSeriesEntry(x) for x in csv.DictReader(csvfile)]
 
 
 def loadCountries():
@@ -94,6 +97,10 @@ def getCsvFilesPaths(dir):
 
 
 def readDailyReports():
+    countrySubstitutions = {
+        'Mainland China': c.china,
+        ' Azerbaijan': 'Azerbaijan'
+    }
     f = getCsvFilesPaths(COVID_19_DIR)
     countries = {}
     for file in sorted(f):
@@ -103,7 +110,8 @@ def readDailyReports():
             date = dt.date(dateTokens[2], dateTokens[0], dateTokens[1])
             entries = [DbEntry(x, date) for x in csv.DictReader(dailyReport)]
             for e in entries:
-                countryName = e.country
+                countryName = countrySubstitutions.get(e.country, e.country)
+
                 if countryName not in countries:
                     countries[countryName] = CountryData(countryName, populations.get(e.country), OrderedDict(),
                                                          OrderedDict(), OrderedDict())
@@ -173,17 +181,17 @@ def readSeries():
     countries = {}
     for countryName in dbDeaths:
         entry = dbDeaths[countryName]
-    recovered = dbRecovered.get(countryName)
-    if recovered:
-        recovered = recovered.stat
-    else:
-        warn("No recovered for " + countryName)
-    confirmed = dbConfirmed.get(countryName)
-    if confirmed:
-        confirmed = confirmed.stat
-    else:
-        warn("No confirmed for " + countryName)
-    countries[entry.country] = CountryData(entry.country, populations.get(entry.country), entry.stat, confirmed, recovered)
+        recovered = dbRecovered.get(countryName)
+        if recovered:
+            recovered = recovered.stat
+        else:
+            warn("No recovered for " + countryName)
+        confirmed = dbConfirmed.get(countryName)
+        if confirmed:
+            confirmed = confirmed.stat
+        else:
+            warn("No confirmed for " + countryName)
+        countries[entry.country] = CountryData(entry.country, populations.get(entry.country), entry.stat, confirmed, recovered)
 
     return countries
 
