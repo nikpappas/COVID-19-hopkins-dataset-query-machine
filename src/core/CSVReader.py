@@ -6,6 +6,7 @@ from dto.CountryData import CountryData
 from population.populations import populations
 from country import countries as c
 from core.utils import parseInt
+import core.Aggregations as agg
 
 COVID_19_DEATHS_FILE = '../COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv'
 COVID_19_CONFIRMED_FILE = '../COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv'
@@ -26,25 +27,7 @@ def warn(s):
 
 
 def main():
-    dbDeaths = mergeCountryView(readStats(COVID_19_DEATHS_FILE))
-    dbConfirmed = mergeCountryView(readStats(COVID_19_CONFIRMED_FILE))
-    dbRecovered = mergeCountryView(readStats(COVID_19_RECOVERED_FILE))
-    countries = {}
-    for countryName in dbDeaths:
-        entry = dbDeaths[countryName]
-        recovered = dbRecovered.get(countryName)
-        if recovered:
-            recovered = recovered.stat
-        else:
-            warn("No recovered for " + countryName)
-        confirmed = dbConfirmed.get(countryName)
-        if confirmed:
-            confirmed = confirmed.stat
-        else:
-            warn("No confirmed for " + countryName)
-
-        countries[entry.country] = CountryData(entry.country, populations.get(entry.country), entry.stat, confirmed, recovered)
-
+    countries = loadCountries()
         # plotItaly(countries)
 
     countryData = [countries[x] for x in COI]
@@ -72,6 +55,7 @@ def main():
     plt.legend()
     plt.title('Deaths per day', fontsize=16)
     plt.show()
+    print(agg.totalDeaths(countries))
 
 
 class DbEntry:
@@ -93,6 +77,29 @@ def parseDate(string):
 def readStats(file):
     with open(file) as csvfile:
         return [DbEntry(x) for x in csv.DictReader(csvfile)]
+
+
+def loadCountries():
+    dbDeaths = mergeCountryView(readStats(COVID_19_DEATHS_FILE))
+    dbConfirmed = mergeCountryView(readStats(COVID_19_CONFIRMED_FILE))
+    dbRecovered = mergeCountryView(readStats(COVID_19_RECOVERED_FILE))
+    countries = {}
+    for countryName in dbDeaths:
+        entry = dbDeaths[countryName]
+        recovered = dbRecovered.get(countryName)
+        if recovered:
+            recovered = recovered.stat
+        else:
+            warn("No recovered for " + countryName)
+        confirmed = dbConfirmed.get(countryName)
+        if confirmed:
+            confirmed = confirmed.stat
+        else:
+            warn("No confirmed for " + countryName)
+
+        countries[entry.country] = CountryData(entry.country, populations.get(entry.country), entry.stat, confirmed, recovered)
+
+    return countries
 
 
 def mergeCountryView(db):
