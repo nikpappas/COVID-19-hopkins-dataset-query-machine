@@ -1,4 +1,5 @@
 COVID-19/*
 CoronaHopkinsQuerryMachine.iml
 .idea/*
-*/*/__pycache__
+*/*/__pycache__/*
+*.pyc
