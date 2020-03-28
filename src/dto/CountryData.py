@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from datetime import timedelta, datetime
 from core.mathUtils import differentiate_distinct
-import core.Aggregations as agg
+import core.aggregations as agg
 
 
 class CountryData(object):
