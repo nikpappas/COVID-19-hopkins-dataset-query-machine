@@ -10,11 +10,11 @@ COVID_19_RECOVERED_FILE = '../../COVID-19/csse_covid_19_data/csse_covid_19_time_
 
 COI = [
     # c.greece,
-    # c.italy,
+    c.italy,
     c.spain,
     # c.uk,
-    # c.us,
-    # c.china,
+    c.us,
+    c.china,
     # c.turkey,
 ]
 

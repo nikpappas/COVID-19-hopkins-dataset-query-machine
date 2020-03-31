@@ -1,6 +1,16 @@
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 import country.countries as c
 import core.aggregations as agg
+
+LINESTYLES = {
+    'solid': '-',
+    'dashed': '--',
+    'dash-dot': '-.',
+    'dotted': ':'
+}
+
+axisDateFormatter = mdates.DateFormatter('%d-%m')
 
 
 def plotCountry(countries, countryName):
@@ -9,26 +19,34 @@ def plotCountry(countries, countryName):
     deathsPerDate = country.deathsPerDate()
     totalDeaths = country.totalDeaths()
     print(totalDeaths)
-    onDate = max(country.deathsAccPerDate.keys())
+    lastDate = max(country.deathsAccPerDate.keys())
     maxDeathsPerDate = max(deathsPerDate.values())
+    lastDeathsPerDate = list(deathsPerDate.values())[-1]
     print(deathsAccPerDate)
     print(deathsPerDate)
     print(maxDeathsPerDate)
     _, ax = plt.subplots()  # fig, ax
 
+    ax.xaxis.set_major_formatter(axisDateFormatter)
+    totLength = len(list(deathsAccPerDate.keys()))
     plt.plot(
-        list(deathsAccPerDate.keys()),
-        list(deathsAccPerDate.values()),
-        label="Deaths Acc in " + countryName
+        list(deathsAccPerDate.keys())[totLength-10:],
+        list(deathsAccPerDate.values())[totLength-10:],
+        label="Deaths Acc in " + countryName,
+        marker='.'
     )
-    ax.annotate('%s' % str(totalDeaths), xy=(onDate, totalDeaths))
+    ax.annotate('%s' % str(totalDeaths), xy=(lastDate, totalDeaths))
 
     plt.plot(
-        list(deathsPerDate.keys()),
-        list(deathsPerDate.values()),
-        label="Deaths per day in " + countryName
+        list(deathsPerDate.keys())[totLength-10:],
+        list(deathsPerDate.values())[totLength-10:],
+        label="Deaths per day in " + countryName,
+        marker='.'
     )
-    ax.annotate('%s' % str(maxDeathsPerDate), xy=(onDate, maxDeathsPerDate))
+    maxOnDate = agg.findKeyForValue(deathsPerDate, maxDeathsPerDate)
+    ax.annotate('max: %s' % str(maxDeathsPerDate), xy=(maxOnDate, maxDeathsPerDate))
+    if maxDeathsPerDate is not lastDeathsPerDate:
+        ax.annotate('%s' % str(lastDeathsPerDate), xy=(lastDate, lastDeathsPerDate))
     plt.legend()
     plt.show()
 
@@ -53,26 +71,26 @@ def plotCountriesOfInterest(countries, coi):
         totalConfirmed = max(confirmedPerDateAcc.values())
         onDate = max(deathsPerDateAcc.keys())
         print("Total deaths: " + country.country + " | " + str(totalDeaths))
-        print("Total recoveder: " + country.country + " | " + str(totalRecovered))
+        print("Total recovered: " + country.country + " | " + str(totalRecovered))
         print("Total confirmed: " + country.country + " | " + str(totalConfirmed))
-        ax.annotate('%s' % totalDeaths, xy=(onDate, totalDeaths))
-        plt.plot(
-            list(deathsPerDateAcc.keys()),
-            list(deathsPerDateAcc.values()),
-            label=country.country + " deaths Acc"
-        )
+        # ax.annotate('%s' % totalDeaths, xy=(onDate, totalDeaths))
+        # plt.plot(
+        #     list(deathsPerDateAcc.keys()),
+        #     list(deathsPerDateAcc.values()),
+        #     label=country.country + " deaths Acc"
+        # )
         ax.annotate('%s' % totalConfirmed, xy=(onDate, totalConfirmed))
         plt.plot(
             list(confirmedPerDateAcc.keys()),
             list(confirmedPerDateAcc.values()),
             label=country.country + " confirmed Acc"
         )
-        ax.annotate('%s' % totalRecovered, xy=(onDate, totalRecovered))
-        plt.plot(
-            list(recoveredPerDateAcc.keys()),
-            list(recoveredPerDateAcc.values()),
-            label=country.country + " recovered Acc"
-        )
+        # ax.annotate('%s' % totalRecovered, xy=(onDate, totalRecovered))
+        # plt.plot(
+        #     list(recoveredPerDateAcc.keys()),
+        #     list(recoveredPerDateAcc.values()),
+        #     label=country.country + " recovered Acc"
+        # )
 
     plt.legend()
     plt.title('COVID-19', fontsize=16)
@@ -93,23 +111,6 @@ def plotCountriesOfInterest(countries, coi):
     plt.show()
 
 
-def plotCountriesOfInterestPerPopulation(countries, coi):
-    countryData = [countries[x] for x in coi]
-
-    _, ax = plt.subplots()  # fig, ax
-
-    for country in countryData:
-        confirmedPerDateAcc = country.confirmedAccPerDateRatio()
-        recoveredPerDateAcc = country.recoveredAccPerDateRatio()
-        deathsPerDateAcc = country.deathsAccPerDateRatio()
-
-        # plotDeathsRatio(deathsPerDateAcc, ax, country)
-        plotConfirmedRatio(confirmedPerDateAcc, ax, country)
-        # plotRecoveredRatio(recoveredPerDateAcc, ax, country)
-
-    plt.legend()
-    plt.title('COVID-19', fontsize=16)
-    plt.show()
 
 
 def plotWorld(countries):
@@ -137,6 +138,25 @@ def plotWorld(countries):
     plt.show()
 
 
+def plotCountriesOfInterestPerPopulation(countries, coi):
+    countryData = [countries[x] for x in coi]
+
+    _, ax = plt.subplots()  # fig, ax
+
+    for country in countryData:
+        confirmedPerDateAcc = country.confirmedAccPerDateRatio()
+        recoveredPerDateAcc = country.recoveredAccPerDateRatio()
+        deathsPerDateAcc = country.deathsAccPerDateRatio()
+
+        plotDeathsRatio(deathsPerDateAcc, ax, country)
+        # plotConfirmedRatio(confirmedPerDateAcc, ax, country)
+        # plotRecoveredRatio(recoveredPerDateAcc, ax, country)
+
+    plt.legend()
+    plt.title('COVID-19', fontsize=16)
+    plt.show()
+
+
 def plotConfirmedRatio(confirmedPerDateAcc, ax, country):
     onDate = max(confirmedPerDateAcc.keys())
     totalConfirmed = max(confirmedPerDateAcc.values())
@@ -157,7 +177,8 @@ def plotDeathsRatio(deathsPerDateAcc, ax, country):
     plt.plot(
         list(deathsPerDateAcc.keys()),
         list(deathsPerDateAcc.values()),
-        label=country.country + " deaths Acc/population"
+        label=country.country + " deaths Acc/population",
+        linestyle=LINESTYLES['dotted']
     )
 
 
@@ -169,5 +190,6 @@ def plotRecoveredRatio(recoveredPerDateAcc, ax, country):
     plt.plot(
         list(recoveredPerDateAcc.keys()),
         list(recoveredPerDateAcc.values()),
-        label=country.country + " recovered Acc/population"
+        label=country.country + " recovered Acc/population",
+        linestyle=LINESTYLES['dashed']
     )

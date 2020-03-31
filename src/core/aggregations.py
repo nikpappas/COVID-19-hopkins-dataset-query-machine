@@ -1,5 +1,6 @@
 from collections import OrderedDict
 
+
 def totalDeaths(db):
     return sum(x.totalDeaths() for x in db.values())
 
@@ -14,3 +15,13 @@ def sumTimeSeries(db, extractor):
             res[key] = val
     return res
 
+
+def findKeyForValue(dictionary, value):
+    return inverseLookup(dictionary, value)
+
+
+def inverseLookup(dictionary, value):
+    for key in dictionary:
+        if dictionary[key] is value:
+            return key
+    return None
