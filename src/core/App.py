@@ -9,12 +9,16 @@ COVID_19_CONFIRMED_FILE = '../../COVID-19/csse_covid_19_data/csse_covid_19_time_
 COVID_19_RECOVERED_FILE = '../../COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv'
 
 COI = [
-    # c.greece,
-    c.italy,
-    c.spain,
-    # c.uk,
+    c.greece,
+    # c.italy,
+    # c.spain,
+    c.uk,
     c.us,
     c.china,
+    'India',
+    'Iran',
+    # 'Netherlands',
+    # 'Sweden',
     # c.turkey,
 ]
 
@@ -22,10 +26,12 @@ COI = [
 def main():
     reader = CSVReader(COVID_19_CONFIRMED_FILE, COVID_19_RECOVERED_FILE, COVID_19_DEATHS_FILE, COVID_19_DIR)
     countries, series = reader.loadCountries()
-    plots.plotCountry(series, c.uk)
+    plots.plotCountry(series, [c.spain, c.italy], 30)
     # plots.plotItaly(countries)
+    # plots.plotCountriesOfInterest(countries, countries.keys())
     # plots.plotCountriesOfInterest(countries, COI)
-    plots.plotCountriesOfInterestPerPopulation(countries, COI)
+    # plots.plotCountriesOfInterestPerPopulation(countries, COI)
+
     # plots.plotWorld(countries)
     #
     print("agg.totalDeaths(countries)", agg.totalDeaths(countries))

@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import country.countries as c
 import core.aggregations as agg
+from core.utils import printForCountry
 
 LINESTYLES = {
     'solid': '-',
@@ -13,41 +14,53 @@ LINESTYLES = {
 axisDateFormatter = mdates.DateFormatter('%d-%m')
 
 
-def plotCountry(countries, countryName):
-    country = countries[countryName]
-    deathsAccPerDate = country.deathsAccPerDate
-    deathsPerDate = country.deathsPerDate()
-    totalDeaths = country.totalDeaths()
-    print(totalDeaths)
-    lastDate = max(country.deathsAccPerDate.keys())
-    maxDeathsPerDate = max(deathsPerDate.values())
-    lastDeathsPerDate = list(deathsPerDate.values())[-1]
-    print(deathsAccPerDate)
-    print(deathsPerDate)
-    print(maxDeathsPerDate)
-    _, ax = plt.subplots()  # fig, ax
+def plotCountry(countries, countryName, numberOfDays=15):
+    if isinstance(countryName, list):
+        countriesToPlot = [countries[x] for x in countryName]
+    else:
+        countriesToPlot = [countries[countryName]]
 
-    ax.xaxis.set_major_formatter(axisDateFormatter)
-    totLength = len(list(deathsAccPerDate.keys()))
-    plt.plot(
-        list(deathsAccPerDate.keys())[totLength-10:],
-        list(deathsAccPerDate.values())[totLength-10:],
-        label="Deaths Acc in " + countryName,
-        marker='.'
-    )
-    ax.annotate('%s' % str(totalDeaths), xy=(lastDate, totalDeaths))
+    fig = plt.figure()
+    ax1, ax2 = fig.subplots(2, 1)
+    styleFigureDark(fig, ax1)
+    styleFigureDark(fig, ax2)
 
-    plt.plot(
-        list(deathsPerDate.keys())[totLength-10:],
-        list(deathsPerDate.values())[totLength-10:],
-        label="Deaths per day in " + countryName,
-        marker='.'
-    )
-    maxOnDate = agg.findKeyForValue(deathsPerDate, maxDeathsPerDate)
-    ax.annotate('max: %s' % str(maxDeathsPerDate), xy=(maxOnDate, maxDeathsPerDate))
-    if maxDeathsPerDate is not lastDeathsPerDate:
-        ax.annotate('%s' % str(lastDeathsPerDate), xy=(lastDate, lastDeathsPerDate))
-    plt.legend()
+    for country in countriesToPlot:
+        deathsAccPerDate = country.deathsAccPerDate
+        deathsPerDate = country.deathsPerDate()
+        totalDeaths = country.totalDeaths()
+        printForCountry(country.country, "Total deaths:", totalDeaths)
+        lastDate = max(country.deathsAccPerDate.keys())
+        maxDeathsPerDate = max(deathsPerDate.values())
+        lastDeathsPerDate = list(deathsPerDate.values())[-1]
+        printForCountry(country.country, "deathsAccPerDate", deathsAccPerDate)
+        printForCountry(country.country, "deathsPerDate:", deathsPerDate)
+        printForCountry(country.country, "maxDeathsPerDate:",maxDeathsPerDate)
+        # fig, ax = plt.subplots()  # fig, ax
+
+        totLength = len(list(deathsAccPerDate.keys()))
+        ax1.plot(
+            list(deathsAccPerDate.keys())[totLength - numberOfDays:],
+            list(deathsAccPerDate.values())[totLength - numberOfDays:],
+            label="Deaths Acc in " + country.country,
+            marker='.'
+        )
+        ax1.annotate('%s' % str(totalDeaths), xy=(lastDate, totalDeaths), color=(1, 1, 1))
+        # fig = plt.subplot(2, 1, 2)
+
+        ax2.plot(
+            list(deathsPerDate.keys())[totLength - numberOfDays:],
+            list(deathsPerDate.values())[totLength - numberOfDays:],
+            label="Deaths per day in " + country.country,
+            marker='.'
+        )
+        maxOnDate = agg.findKeyForValue(deathsPerDate, maxDeathsPerDate)
+        ax2.annotate('max: %s' % str(maxDeathsPerDate), xy=(maxOnDate, maxDeathsPerDate), color=(1, 1, 1))
+        if maxDeathsPerDate is not lastDeathsPerDate:
+            ax2.annotate('%s' % str(lastDeathsPerDate), xy=(lastDate, lastDeathsPerDate), color=(1, 1, 1))
+
+    ax1.legend()
+    ax2.legend()
     plt.show()
 
 
@@ -109,8 +122,6 @@ def plotCountriesOfInterest(countries, coi):
     # plt.legend()
     # plt.title('Deaths per day', fontsize=16)
     plt.show()
-
-
 
 
 def plotWorld(countries):
@@ -178,7 +189,7 @@ def plotDeathsRatio(deathsPerDateAcc, ax, country):
         list(deathsPerDateAcc.keys()),
         list(deathsPerDateAcc.values()),
         label=country.country + " deaths Acc/population",
-        linestyle=LINESTYLES['dotted']
+        # linestyle=LINESTYLES['dotted']
     )
 
 
@@ -193,3 +204,12 @@ def plotRecoveredRatio(recoveredPerDateAcc, ax, country):
         label=country.country + " recovered Acc/population",
         linestyle=LINESTYLES['dashed']
     )
+
+
+def styleFigureDark(fig, ax):
+    fig.patch.set_facecolor((0.1, 0.1, 0.11))
+    # ax.set_facecolor('xkcd:salmon')
+    ax.set_facecolor((0.2, 0.2, 0.21))
+    ax.xaxis.set_major_formatter(axisDateFormatter)
+    # ax.tick_params(axis='x', colors=(.9, .9, .91))
+    ax.tick_params(colors=(.9, .9, .91))

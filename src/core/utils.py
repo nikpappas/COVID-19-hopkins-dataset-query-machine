@@ -23,3 +23,7 @@ def getCsvFilesPaths(dir):
     for (dirpath, dirnames, filenames) in walk(dir):
         f.extend(filter(lambda x: '.csv' in x, filenames))
     return [path.join(dir, filename) for filename in f]
+
+
+def printForCountry(country, *strings):
+    print("[", country, "] -", strings)
