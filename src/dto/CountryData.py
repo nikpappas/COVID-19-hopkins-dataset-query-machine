@@ -30,23 +30,23 @@ class CountryData(object):
     def totalConfirmed(self):
         return total(self.confirmedAccPerDate)
 
-    def deathsAccPerDateRatio(self):
-        return seriesPerRatio(self.deathsAccPerDate, self.population)
+    def deathsAccPerDateRatio(self, perPeople=1):
+        return seriesPerRatio(self.deathsAccPerDate, self.population, perPeople)
 
-    def deathsPerDateRatio(self):
-        return seriesPerRatio(self.deathsPerDate(), self.population)
+    def deathsPerDateRatio(self, perPeople=1):
+        return seriesPerRatio(self.deathsPerDate(), self.population, perPeople)
 
-    def confirmedAccPerDateRatio(self):
-        return seriesPerRatio(self.confirmedAccPerDate, self.population)
+    def confirmedAccPerDateRatio(self, perPeople=1):
+        return seriesPerRatio(self.confirmedAccPerDate, self.population, perPeople)
 
-    def confirmedPerDateRatio(self):
-        return seriesPerRatio(self.confirmedPerDate(), self.population)
+    def confirmedPerDateRatio(self, perPeople=1):
+        return seriesPerRatio(self.confirmedPerDate(), self.population, perPeople)
 
-    def recoveredAccPerDateRatio(self):
-        return seriesPerRatio(self.recoveredAccPerDate, self.population)
+    def recoveredAccPerDateRatio(self, perPeople=1):
+        return seriesPerRatio(self.recoveredAccPerDate, self.population, perPeople)
 
-    def recoveredPerDateRatio(self):
-        return seriesPerRatio(self.recoveredPerDate(), self.population)
+    def recoveredPerDateRatio(self, perPeople=1):
+        return seriesPerRatio(self.recoveredPerDate(), self.population, perPeople)
 
 
 def perDate(accStat):
@@ -56,8 +56,7 @@ def perDate(accStat):
 def total(accStat):
     return max(accStat.values())
 
-def seriesPerRatio(accStat, population):
+
+def seriesPerRatio(accStat, population, perPeople):
     if population:
-        return OrderedDict([(k, accStat[k] / population) for k in accStat])
-
-
+        return OrderedDict([(k, perPeople * accStat[k] / population) for k in accStat])

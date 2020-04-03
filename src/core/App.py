@@ -26,7 +26,8 @@ COI = [
 def main():
     reader = CSVReader(COVID_19_CONFIRMED_FILE, COVID_19_RECOVERED_FILE, COVID_19_DEATHS_FILE, COVID_19_DIR)
     countries, series = reader.loadCountries()
-    plots.plotCountry(series, [c.spain, c.italy], 30)
+    # plots.plotCountry(countries, [c.spain, c.italy, c.uk], numberOfDays=15, plotPerPopulation=True)
+    plots.plotCountry(countries, COI, numberOfDays=15, plotPerPopulation=True)
     # plots.plotItaly(countries)
     # plots.plotCountriesOfInterest(countries, countries.keys())
     # plots.plotCountriesOfInterest(countries, COI)
