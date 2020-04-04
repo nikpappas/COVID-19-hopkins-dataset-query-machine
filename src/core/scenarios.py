@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import numpy as np
 import country.countries as c
 import core.aggregations as agg
 from core.utils import printForCountry
