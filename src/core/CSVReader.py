@@ -1,10 +1,11 @@
 import csv
 import datetime as dt
 from collections import OrderedDict
-from dto.CountryData import CountryData
-from population.populations import populations
-from country import countries as c
+
 from core.utils import parseInt, parseDate, getCsvFilesPaths, addWithDefault
+from country import countries as c
+from dto.CountryData import CountryData
+from population.populations import populations, usStatePopulations
 
 
 class CSVReader:
@@ -42,6 +43,15 @@ class CSVReader:
                     addWithDefault(country.deathsAccPerDate, date, 0, e.deaths)
                     addWithDefault(country.confirmedAccPerDate, date, 0, e.confirmed)
                     addWithDefault(country.recoveredAccPerDate, date, 0, e.recovered)
+                    if e.state:
+                        stateKey = countryName + ':' + e.state
+                        if stateKey not in countries:
+                            countries[stateKey] = CountryData(stateKey, usStatePopulations.get(e.state),
+                                                                 OrderedDict(), OrderedDict(), OrderedDict())
+                        state = countries[stateKey]
+                        addWithDefault(state.deathsAccPerDate, date, 0, e.deaths)
+                        addWithDefault(state.confirmedAccPerDate, date, 0, e.confirmed)
+                        addWithDefault(state.recoveredAccPerDate, date, 0, e.recovered)
 
         return countries
 
@@ -118,5 +128,3 @@ class DbSeriesEntry:
             except:
                 print('Could not delete Province/State for: ' + str(row))
         self.stat = OrderedDict([(parseDate(x), parseInt(row[x])) for (x) in row])
-
-

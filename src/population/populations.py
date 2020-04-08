@@ -1,4 +1,5 @@
 import csv
+
 from core.utils import parseInt
 
 
@@ -8,4 +9,11 @@ def readCsvPopulations():
         return {row['\ufeffCountry Name']: parseInt(row['2018']) for row in rows}
 
 
+def readCsvUsStatePopulations():
+    with open('../../us-populations.csv') as csvfile:
+        rows = csv.DictReader(csvfile)
+        return {row['State']: parseInt(row['Pop']) for row in rows}
+
+
 populations = readCsvPopulations()
+usStatePopulations = readCsvUsStatePopulations()

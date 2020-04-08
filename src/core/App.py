@@ -1,6 +1,7 @@
 from  core.CSVReader import CSVReader
 from core import aggregations as agg
 from country import countries as c
+from country import states as s
 from core import scenarios as plots
 
 COVID_19_DIR = '../../COVID-19/csse_covid_19_data/csse_covid_19_daily_reports/'
@@ -10,14 +11,14 @@ COVID_19_RECOVERED_FILE = '../../COVID-19/csse_covid_19_data/csse_covid_19_time_
 
 COI = [
     c.greece,
-    # c.italy,
-    # c.spain,
+    c.italy,
+    c.spain,
     c.uk,
     c.us,
-    c.china,
-    'India',
-    'Iran',
-    c.southKorea
+    # c.china,
+    # 'India',
+    # 'Iran',
+    # c.southKorea
     # 'Netherlands',
     # 'Sweden',
     # c.turkey,
@@ -27,8 +28,12 @@ COI = [
 def main():
     reader = CSVReader(COVID_19_CONFIRMED_FILE, COVID_19_RECOVERED_FILE, COVID_19_DEATHS_FILE, COVID_19_DIR)
     countries, series = reader.loadCountries()
-    plots.plotCountry(countries, [c.spain, c.italy, c.uk], numberOfDays=15, plotPerPopulation=True)
-    # plots.plotCountry(countries, COI, numberOfDays=15, plotPerPopulation=True)
+    # countries[c.italy].deathsAccPerDate = agg.transposeDays(countries[c.italy].deathsAccPerDate, 16)
+    # countries[c.spain].deathsAccPerDate = agg.transposeDays(countries[c.spain].deathsAccPerDate, 10)
+    # plots.plotExponential(series, [c.spain, c.italy, c.uk, c.greece, c.china, c.france])
+    plots.plotCountry(countries, [c.spain, c.italy, c.uk], numberOfDays=30, plotPerPopulation=True)
+    # plots.plotCountry(countries, COI, numberOfDays=15, plotPerPopulation=False)
+    # plots.plotCountry(countries, COI, numberOfDays=15, plotPerPopulation=False, pltScale='log')
     # plots.plotItaly(countries)
     # plots.plotCountriesOfInterest(countries, countries.keys())
     # plots.plotCountriesOfInterest(countries, COI)
