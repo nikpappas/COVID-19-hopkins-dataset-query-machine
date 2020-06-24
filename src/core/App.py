@@ -30,8 +30,19 @@ def main():
     countries, series = reader.loadCountries()
     # countries[c.italy].deathsAccPerDate = agg.transposeDays(countries[c.italy].deathsAccPerDate, 16)
     # countries[c.spain].deathsAccPerDate = agg.transposeDays(countries[c.spain].deathsAccPerDate, 10)
-    # plots.plotExponential(series, [c.spain, c.italy, c.uk, c.greece, c.china, c.france])
-    plots.plotCountry(countries, [c.spain, c.italy, c.uk], numberOfDays=30, plotPerPopulation=True)
+
+
+    plots.plotExponential(series, [c.spain, c.italy, c.uk, c.greece, c.china, c.france, c.us])
+    plots.plotCountry(countries, [
+        c.spain,
+        c.italy,
+        c.uk,
+        # c.germany,
+        # c.us,
+        c.greece,
+        # 'Japan'
+    ], numberOfDays=160, plotPerPopulation=True, granularity=10)
+    plots.plotCountriesOfInterest(countries, [c.spain, c.italy, c.uk, c.france, c.germany, c.us, c.greece])
     # plots.plotCountry(countries, COI, numberOfDays=15, plotPerPopulation=False)
     # plots.plotCountry(countries, COI, numberOfDays=15, plotPerPopulation=False, pltScale='log')
     # plots.plotItaly(countries)
@@ -43,6 +54,7 @@ def main():
     #
     print("agg.totalDeaths(countries)", agg.totalDeaths(countries))
     print("agg.totalDeaths(series)", agg.totalDeaths(series))
+
 
 
 if __name__ == '__main__':

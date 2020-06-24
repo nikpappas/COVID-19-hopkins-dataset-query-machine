@@ -30,63 +30,47 @@ def inverseLookup(dictionary, value):
 
 def perBucketOfDays(dictionary, days=7):
     newDict = OrderedDict()
-    index = 0
-    total = 0
-    count = 0
-    for key in dictionary:
-        if count is days:
-            newDict[index] = total
-            index = index + 1
-            total = 0
-            count = 0
-
-        total = total + dictionary[key]
-        count = count + 1
-
-    newDict[index] = total
-
+    newKeys = perBucketOfDaysListDates(dictionary.keys(), days)
+    newValues = perBucketOfDaysListInt(dictionary.values(), days)
+    for i in range(0, len(newKeys)):
+        newDict[newKeys[i]] = newValues[i]
     return newDict
 
 
 def perBucketOfDaysListInt(items, days=7):
-    newItems = []
-    total = 0
-    count = 0
-    for item in items:
-        if count is days:
-            newItems.append(total)
-            total = 0
-            count = 0
+    clonedItems = [x for x in items]
+    toRet = []
+    while len(clonedItems):
+        newItem = []
+        while len(clonedItems) and len(newItem) < days - 1:
+            newItem.append(clonedItems.pop())
+        toRet.append(sum(newItem))
 
-        total = total + item
-        count = count + 1
-
-    if total > 0:
-        newItems.append(total * (days-count+1))
-
-    return newItems
+    return list(reversed(toRet))
 
 
 def perBucketOfDaysListDates(items, days=7):
-    newItems = []
-    total = None
-    count = 0
-    for item in items:
-        if count is days:
-            newItems.append(total)
-            total = None
-            count = 0
+    clonedItems = [x for x in items]
+    toRet = []
+    while len(clonedItems):
+        newItem = []
+        while len(clonedItems) and len(newItem) < days - 1:
+            newItem.append(clonedItems.pop())
+        toRet.append(newItem[0])
 
-        total = item
-        count = count + 1
+    return list(reversed(toRet))
 
-    if total:
-        newItems.append(total)
-
-    return newItems
 
 def transposeDays(dictionary, days):
     newDict = OrderedDict()
     for key in dictionary:
-        newDict[key+timedelta(days=days)] = dictionary[key]
+        newDict[key + timedelta(days=days)] = dictionary[key]
     return newDict
+
+
+def extractLastDaysFromData(x, days):
+    totLength = len(x)
+    if days < totLength:
+        return x[-days:]
+    else:
+        return x
