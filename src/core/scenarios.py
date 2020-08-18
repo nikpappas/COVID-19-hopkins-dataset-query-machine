@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 
 import core.aggregations as agg
 import country.countries as c
-from core.utils import printForCountry
-from core.plot.plotConfiguration import COLORS, styleFigureDark
+from core.plot.plotConfiguration import COLORS, LINESTYLES, styleFigureDark
+from core.utils import printForCountry, printAggregates, smoothenCurve, mapToCountries
 
 axisDateFormatter = mdates.DateFormatter('%d-%m')
 
@@ -45,12 +45,13 @@ def plotExponential(countries, countryName):
     plt.show()
 
 
-def plotCountry(countries, countryName, numberOfDays=15, plotPerPopulation=False, pltScale='linear', granularity=1):
+
+def plotCountry(countries, countryName, numberOfDays=15, relative=False, pltScale='linear', granularity=1):
     countriesToPlot = mapToCountries(countries, countryName)
 
     fig = plt.figure()
     title = "COVID-19: Deaths"
-    if plotPerPopulation:
+    if relative:
         title = title + " per 100K people"
     ax1, ax2 = fig.subplots(2, 1)
     ax1.set_title(title, color=COLORS['tainted-white'])
@@ -59,7 +60,7 @@ def plotCountry(countries, countryName, numberOfDays=15, plotPerPopulation=False
 
     ax1.set_yscale(pltScale)
     for country in countriesToPlot:
-        if plotPerPopulation:
+        if relative:
             deathsAccPerDate = country.deathsAccPerDateRatio(perPeople=100000)
         else:
             deathsAccPerDate = country.deathsAccPerDate
@@ -74,9 +75,7 @@ def plotCountry(countries, countryName, numberOfDays=15, plotPerPopulation=False
         x = agg.extractLastDaysFromData(x, numberOfDays)
         y = agg.extractLastDaysFromData(y, numberOfDays)
 
-        if granularity > 1:
-            x = agg.perBucketOfDaysListDates(x, days=granularity)
-            y = agg.perBucketOfDaysListInt(y, days=granularity)
+        x, y = smoothenCurve(x, y, granularity)
 
         ax1.plot(
             x,
@@ -84,33 +83,24 @@ def plotCountry(countries, countryName, numberOfDays=15, plotPerPopulation=False
             label="Deaths Acc in " + country.country,
             marker='.'
         )
-        ax1.annotate('%02.4f' % totalDeaths, xy=(lastDate, totalDeaths), color=(1, 1, 1))
-        if plotPerPopulation:
+        ax1.annotate('%02.4f' % totalDeaths, xy=(lastDate, totalDeaths), color=COLORS['white'])
+        if relative:
             deathsPerDate = country.deathsPerDateRatio(perPeople=100000)
         else:
             deathsPerDate = country.deathsPerDate()
         maxDeathsPerDate = max(deathsPerDate.values())
         lastDeathsPerDate = list(deathsPerDate.values())[-1]
+
         # Filter dates by date not by number
-        printForCountry(country.country, "maxDeathsPerDate:", maxDeathsPerDate)
-        printForCountry(country.country, "lastDeathsPerDate:", lastDeathsPerDate)
         numOfDaysForAggregatsion = 7
-        last10Days = list(deathsPerDate.values())[-numOfDaysForAggregatsion:]
-        l10DaysBeforeLast10DAys = list(deathsPerDate.values())[-numOfDaysForAggregatsion * 2:-numOfDaysForAggregatsion]
-        deathsLast10Days = sum(last10Days)
-        prevDeathsLast10Days = sum(l10DaysBeforeLast10DAys)
-        printForCountry(country.country, "deathsLast10Days [" + str(numOfDaysForAggregatsion) + "]:", deathsLast10Days)
-        printForCountry(country.country, "prevDeathsLast10Days [" + str(numOfDaysForAggregatsion) + "]:",
-                        prevDeathsLast10Days)
+        printAggregates(country, maxDeathsPerDate, lastDeathsPerDate, deathsPerDate, numOfDaysForAggregatsion, 'Deaths')
 
         x = list(deathsPerDate.keys())
         y = list(deathsPerDate.values())
         x = agg.extractLastDaysFromData(x, numberOfDays)
         y = agg.extractLastDaysFromData(y, numberOfDays)
 
-        if granularity > 1:
-            x = agg.perBucketOfDaysListDates(x, days=granularity)
-            y = agg.perBucketOfDaysListInt(y, days=granularity)
+        x, y = smoothenCurve(x, y, granularity)
 
         ax2.plot(
             x,
@@ -119,13 +109,102 @@ def plotCountry(countries, countryName, numberOfDays=15, plotPerPopulation=False
             marker='.'
         )
         maxOnDate = agg.findKeyForValue(deathsPerDate, maxDeathsPerDate)
-        ax2.annotate('max: %02.4f' % maxDeathsPerDate, xy=(maxOnDate, maxDeathsPerDate), color=(1, 1, 1))
+        ax2.annotate('max: %02.4f' % maxDeathsPerDate, xy=(maxOnDate, maxDeathsPerDate), color=COLORS['white'])
         if maxDeathsPerDate is not lastDeathsPerDate:
-            ax2.annotate('%02.4f' % lastDeathsPerDate, xy=(lastDate, lastDeathsPerDate), color=(1, 1, 1))
+            ax2.annotate('%02.4f' % lastDeathsPerDate, xy=(lastDate, lastDeathsPerDate), color=COLORS['white'])
 
     ax1.legend()
     ax2.legend()
     plt.show()
+
+
+def plotWithLockDownLine(countries, countryName, numberOfDays=15, relative=False, pltScale='linear', granularity=1,
+                         lockDownLevel=None):
+    ax1, ax2, plt = plotCountryCases(countries, countryName, numberOfDays, relative, pltScale, granularity)
+    if lockDownLevel:
+        countriesToPlot = mapToCountries(countries, countryName)
+        if len(countriesToPlot):
+            countriesToPlot = countriesToPlot[0]
+        startDate, _ = list(countriesToPlot.confirmedPerDate().items())[0]
+        endDate, _ = list(countriesToPlot.confirmedPerDate().items())[-1]
+        ax2.plot([startDate, endDate], [lockDownLevel, lockDownLevel], label="lockdown")
+        ax1.legend()
+        ax2.legend()
+        plt.show()
+
+
+
+def plotCountryCases(countries, countryName, numberOfDays=15, relative=False, pltScale='linear', granularity=1):
+    countriesToPlot = mapToCountries(countries, countryName)
+
+    fig = plt.figure()
+    title = "COVID-19: Cases"
+    if relative:
+        title = title + " per 100K people"
+    ax1, ax2 = fig.subplots(2, 1)
+    ax1.set_title(title, color=COLORS['tainted-white'])
+    styleFigureDark(fig, ax1)
+    styleFigureDark(fig, ax2)
+
+    ax1.set_yscale(pltScale)
+    for country in countriesToPlot:
+        if relative:
+            deathsAccPerDate = country.confirmedAccPerDateRatio(perPeople=100000)
+        else:
+            deathsAccPerDate = country.confirmedAccPerDate
+
+        totalDeaths = max(deathsAccPerDate.values())
+        printForCountry(country.country, "Total cases:", totalDeaths)
+        lastDate = max(deathsAccPerDate.keys())
+        # fig, ax = plt.subplots()  # fig, ax
+        x = list(deathsAccPerDate.keys())
+        y = list(deathsAccPerDate.values())
+
+        x = agg.extractLastDaysFromData(x, numberOfDays)
+        y = agg.extractLastDaysFromData(y, numberOfDays)
+
+        x, y = smoothenCurve(x, y, granularity)
+
+        ax1.plot(
+            x,
+            y,
+            label="Cases Acc in " + country.country,
+            marker='.'
+        )
+        ax1.annotate('%02.4f' % totalDeaths, xy=(lastDate, totalDeaths), color=COLORS['white'])
+        if relative:
+            deathsPerDate = country.confirmedPerDateRatio(perPeople=100000)
+        else:
+            deathsPerDate = country.confirmedPerDate()
+        maxDeathsPerDate = max(deathsPerDate.values())
+        lastDeathsPerDate = list(deathsPerDate.values())[-1]
+        # Filter dates by date not by number
+
+        numOfDaysForAggregatsion = 7
+        printAggregates(country, maxDeathsPerDate, lastDeathsPerDate, deathsPerDate, numOfDaysForAggregatsion, 'Cases')
+
+        x = list(deathsPerDate.keys())
+        y = list(deathsPerDate.values())
+        x = agg.extractLastDaysFromData(x, numberOfDays)
+        y = agg.extractLastDaysFromData(y, numberOfDays)
+
+        x, y = smoothenCurve(x, y, granularity)
+
+        ax2.plot(
+            x,
+            y,
+            label="Cases per day in " + country.country,
+            marker='.'
+        )
+        maxOnDate = agg.findKeyForValue(deathsPerDate, maxDeathsPerDate)
+        ax2.annotate('max: %02.4f' % maxDeathsPerDate, xy=(maxOnDate, maxDeathsPerDate), color=COLORS['white'])
+        if maxDeathsPerDate is not lastDeathsPerDate:
+            ax2.annotate('%02.4f' % lastDeathsPerDate, xy=(lastDate, lastDeathsPerDate), color=COLORS['white'])
+
+    ax1.legend()
+    ax2.legend()
+    # plt.show()
+    return ax1, ax2, plt
 
 
 def plotItaly(countries):
@@ -270,15 +349,7 @@ def plotRecoveredRatio(recoveredPerDateAcc, ax, country):
     )
 
 
-
 # def plotTrendLine(x, y, ax):
 #     z = np.polyfit(x, y, 1)
 #     p = np.poly1d(z)
 #     ax.plot(x, p(x), linestyle=LINESTYLES['dotted'])
-
-def mapToCountries(countries, countryName):
-    if isinstance(countryName, list):
-        return [countries[x] for x in countryName]
-    else:
-        return [countries[countryName]]
-

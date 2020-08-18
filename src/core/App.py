@@ -32,16 +32,26 @@ def main():
     # countries[c.spain].deathsAccPerDate = agg.transposeDays(countries[c.spain].deathsAccPerDate, 10)
 
 
-    plots.plotExponential(series, [c.spain, c.italy, c.uk, c.greece, c.china, c.france, c.us])
-    plots.plotCountry(countries, [
+    # plots.plotExponential(series, [c.spain, c.italy, c.uk, c.greece, c.china, c.france, c.us])
+    c4plot = [
         c.spain,
         c.italy,
         c.uk,
         # c.germany,
         # c.us,
+        # c.brazil,
         c.greece,
+        # c.southKorea,
+        # 'Kenya',
+        'Serbia'
         # 'Japan'
-    ], numberOfDays=160, plotPerPopulation=True, granularity=10)
+    ]
+    plots.plotCountry(countries, c4plot, numberOfDays=160, relative=True, granularity=5)
+    plots.plotCountryCases(countries, c4plot, numberOfDays=160, relative=True, granularity=5)
+    # Plot greecewith lockdonw line
+    # plots.plotWithLockDownLine(countries, c.greece, numberOfDays=160, relative=False, granularity=1, lockDownLevel=130)
+    # Plot uk with lockdonw line
+    # plots.plotWithLockDownLine(countries, c.uk, numberOfDays=160, relative=False, granularity=1, lockDownLevel=6650)
     plots.plotCountriesOfInterest(countries, [c.spain, c.italy, c.uk, c.france, c.germany, c.us, c.greece])
     # plots.plotCountry(countries, COI, numberOfDays=15, plotPerPopulation=False)
     # plots.plotCountry(countries, COI, numberOfDays=15, plotPerPopulation=False, pltScale='log')

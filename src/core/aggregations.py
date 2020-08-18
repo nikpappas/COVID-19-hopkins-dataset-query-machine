@@ -38,13 +38,21 @@ def perBucketOfDays(dictionary, days=7):
 
 
 def perBucketOfDaysListInt(items, days=7):
+    return perBucketOfDaysList(items, days, sum)
+
+
+def perBucketOfDaysListIntAvg(items, days=7):
+    return perBucketOfDaysList(items, days, lambda sublist: sum(sublist) / len(sublist))
+
+
+def perBucketOfDaysList(items, days, smoothFunc):
     clonedItems = [x for x in items]
     toRet = []
     while len(clonedItems):
         newItem = []
         while len(clonedItems) and len(newItem) < days - 1:
             newItem.append(clonedItems.pop())
-        toRet.append(sum(newItem))
+        toRet.append(smoothFunc(newItem))
 
     return list(reversed(toRet))
 

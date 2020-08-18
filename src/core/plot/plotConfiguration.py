@@ -9,6 +9,7 @@ COLORS = {
     'tainted-white': (.9, .9, .91),
     'light-grey': (0.2, 0.2, 0.21),
     'dark-grey': (0.1, 0.1, 0.11),
+    'white': (1, 1, 1),
 }
 
 
@@ -42,6 +43,11 @@ def styleFigureDark(fig, ax, axisDateFormatter=None):
     AxConfigBuilder(ax)\
         .withAxis('x')\
         .withTickColour(COLORS['tainted-white'])\
+        .configure()
+
+    AxConfigBuilder(ax) \
+        .withAxis('y') \
+        .withTickColour(COLORS['tainted-white']) \
         .configure()
 
 
