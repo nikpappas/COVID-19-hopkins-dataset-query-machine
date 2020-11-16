@@ -40,19 +40,22 @@ def main():
         # c.germany,
         # c.us,
         # c.brazil,
+        c.france,
         c.greece,
         # c.southKorea,
         # 'Kenya',
-        'Serbia'
+        'Malta',
+        'Serbia',
+        'Bulgaria',
         # 'Japan'
     ]
-    plots.plotCountry(countries, c4plot, numberOfDays=160, relative=True, granularity=5)
-    plots.plotCountryCases(countries, c4plot, numberOfDays=160, relative=True, granularity=5)
+    plots.plotCountry(countries, c4plot, numberOfDays=260, relative=True, granularity=7)
+    plots.plotCountryCases(countries, c4plot, numberOfDays=260, relative=True, granularity=7)
     # Plot greecewith lockdonw line
-    # plots.plotWithLockDownLine(countries, c.greece, numberOfDays=160, relative=False, granularity=1, lockDownLevel=130)
+    plots.plotWithLockDownLine(countries, c.greece, numberOfDays=160, relative=False, granularity=1, lockDownLevel=130)
     # Plot uk with lockdonw line
-    # plots.plotWithLockDownLine(countries, c.uk, numberOfDays=160, relative=False, granularity=1, lockDownLevel=6650)
-    plots.plotCountriesOfInterest(countries, [c.spain, c.italy, c.uk, c.france, c.germany, c.us, c.greece])
+    plots.plotWithLockDownLine(countries, c.uk, numberOfDays=160, relative=False, granularity=1, lockDownLevel=6650)
+    # plots.plotCountriesOfInterest(countries, [c.spain, c.italy, c.uk, c.france, c.germany, c.us, c.greece])
     # plots.plotCountry(countries, COI, numberOfDays=15, plotPerPopulation=False)
     # plots.plotCountry(countries, COI, numberOfDays=15, plotPerPopulation=False, pltScale='log')
     # plots.plotItaly(countries)

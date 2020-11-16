@@ -48,10 +48,15 @@ def printAggregates(country, maxPerDate, lastPerDate, valuesPerDate, numOfDaysFo
 
 
 
-def smoothenCurve(x, y, granularity):
+def smoothenCurve(x, y, granularity, avg=False):
     if granularity > 1:
-        x = agg.perBucketOfDaysListDates(x, days=granularity)
-        y = agg.perBucketOfDaysListIntAvg(y, days=granularity)
+        if avg:
+            x = agg.perBucketOfDaysListDates(x, days=granularity)
+            y = agg.perBucketOfDaysListIntAvg(y, days=granularity)
+        else:
+            x = agg.perBucketOfDaysListDates(x, days=granularity)
+            y = agg.perBucketOfDaysListInt(y, days=granularity)
+
     return x, y
 
 def mapToCountries(countries, countryName):
